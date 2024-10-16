@@ -1,10 +1,8 @@
 import os
-from dataclasses import replace
+from cProfile import label
 
 import discord
 from discord.ext import commands
-from jinja2.utils import open_if_exists
-from sympy import false
 
 token = "MTI3NjE0MzYwNjUzNjg2Mzc4Ng.GCUmTf.pdtFm9h3yFYP7QBzD2PnTgXera_C66CMMdaKc0"
 intents = discord.Intents.all()
@@ -14,6 +12,26 @@ intents.emojis = True
 intents.members = True
 intents.guilds = True
 bot = commands.Bot(command_prefix="/", intents=intents)
+
+#Variables utiles
+#Users
+lcmvwb = 1276143606536863786
+magnifiqueid = 1157663620671488001
+ledevprimeid = 1128719599811178577
+#GeneralsChannels
+rules = 1276472259145502742
+annonces_discord = 1280860306113040384
+annonces_jeu = 1280860214479949854
+reseaux = 1280857647351988314
+bonjour_aurevoir = 1276278528845021185
+general = 1276471754688303197
+commandes_bots = 1276480057141100630
+memes = 1276480542237266052
+debats = 1276481096661602386
+aide = 1276474446429028404
+idees = 1280861182797807728
+ticket = 1283669981384413234
+compte = 1295122739471843379
 
 @bot.event
 async def on_ready():
@@ -70,39 +88,98 @@ async def aider(interaction: discord.Interaction):
 
 @bot.tree.command(name="mp", description="Envoie un message dans un salon spécifié (admins seulement)")
 async def mp(interaction: discord.Interaction, member: discord.Member, message: str):
-    magnifiqueid = 1157663620671488001
-    ledevprimeid = 1128719599811178577
+    await interaction.response.defer()
     idUser = interaction.user.id
     if idUser == magnifiqueid or idUser == ledevprimeid:
         chars = '(\'\',)'
-        await interaction.response.send_message(f"Un mp à bien été envoyé à {member.display_name} de ma part pour {interaction.user.display_name}")
+        await interaction.followup.send(f"Un mp à bien été envoyé à {member.display_name} de ma part pour {interaction.user.display_name}")
         translatedMessage = str(message).translate(str.maketrans('', '', chars))
         await member.send(f"Salut {member.mention}, \n{translatedMessage}")
     else:
-        await interaction.response.send_message("Désolé, vous n'avez pas la permission d'exécuter cette commande :man_shrugging:")
+        await interaction.followup.send("Désolé, vous n'avez pas la permission d'exécuter cette commande :man_shrugging:")
 
 
 @bot.tree.command(name="message", description="Envoie un message dans un salon spécifié (admins seulement)")
 async def message(interaction: discord.Interaction, channel: discord.TextChannel, mention: discord.Role, message: str):
-    magnifiqueid = 1157663620671488001
-    ledevprimeid = 1128719599811178577
+    await interaction.response.defer()
     idUser = interaction.user.id
     if idUser == magnifiqueid or idUser == ledevprimeid:
         chars = '(\'\',)'
         translatedMessage = str(message).translate(str.maketrans('', '', chars))
         await channel.send(f"{mention.mention}, \n{translatedMessage}")
     else:
-        await interaction.response.send_message("Désolé, vous n'avez pas la permission d'exécuter cette commande :man_shrugging:")
+        await interaction.followup.send("Désolé, vous n'avez pas la permission d'exécuter cette commande :man_shrugging:")
+
+@bot.tree.command(name="debat", description="Lance un débat (admins seulement)")
+async def debat(interaction: discord.Interaction, rappeler: bool, titre: str, description: str ):
+    await interaction.response.defer()
+    idUser = int(interaction.user.id)
+    channel = int(interaction.channel_id)
+    if idUser == magnifiqueid or idUser == ledevprimeid:
+        reponse = await interaction.followup.send(f"<@&1283128903082315816> \n**Sujet du jour : {titre}** \nDescription : {description}")
+        if os.path.exists("debats.txt"):
+            fichierAppend = open("debats.txt", "a")
+            fichierRead = open("debats.txt", "r")
+            fichierAppend.write('\n' + f"{interaction.created_at} Sujet du jour : {titre}, description : {description}")
+        else:
+            fichierCreate = open("debats.txt", "x")
+            fichierAppend = open("debats.txt", "a")
+            fichierRead = open("debats.txt", "r")
+            nblignes = 1
+            for line in fichierRead:
+                nblignes += 1
+            fichierAppend.write(f"{interaction.created_at} Sujet du jour : {titre}, description : {description}")
+    elif rappeler == True:
+        await interaction.followup.send(f"**Sujet du jour : {titre}** \nDescription : {description}")
+    else:
+        await interaction.followup.send("Désolé, vous n'avez pas la permission d'exécuter cette commande :man_shrugging:")
+
+@bot.tree.command(name="signaler", description="Signale une personne (ne surtout pas abuser)")
+async def signaler(interaction: discord.Interaction, membre: discord.Member, raison: str):
+    idUser = int(interaction.user.id)
+    goat = bot.get_channel(1276469579131912283)
+    await interaction.response.defer()
+    if membre.id != idUser:
+        await interaction.followup.send(f"*{membre.display_name}* à bien été signalé, les admins vont observer cela !")
+        if os.path.exists("signalements" + str(membre) + ".txt"):
+            fichierAppend = open("signalements" + str(membre) + ".txt", "a")
+            fichierRead = open("signalements" + str(membre) + ".txt", "r")
+            nblignes = 1
+            for line in fichierRead:
+                nblignes += 1
+            fichierAppend.write('\n' + f"{interaction.created_at} Signalement: raison: {raison}, auteur: {interaction.user.name}")
+            if nblignes > 4:
+                await goat.send(f"<@{magnifiqueid}><@{ledevprimeid}>, \nAllez voir le fichier **{fichierRead.name}** !")
+        else:
+            fichierCreate = open("signalements" + str(membre) + ".txt", "x")
+            fichierAppend = open("signalements" + str(membre) + ".txt", "a")
+            fichierRead = open("signalements" + str(membre) + ".txt", "r")
+            nblignes = 1
+            for line in fichierRead:
+                nblignes += 1
+            fichierAppend.write(f"{interaction.created_at} Signalement: raison: {raison}, auteur: {interaction.user.name}")
+            if nblignes > 4:
+                await goat.send(f"<@{magnifiqueid}><@{ledevprimeid}>, \nAllez voir le fichier **{fichierRead.name}** !")
+    else:
+        await interaction.followup.send("Vous ne pouvez pas vous signaler vous même ! :man_shrugging:")
+
+@bot.event
+async def on_member_join(member):
+    channel = bot.get_channel(bonjour_aurevoir)
+    await channel.send(f"Bienvenue à {member.mention} sur le serveur ! \nOn espère que tu t'amuseras bien ! :grin:")
+
 
 @bot.event
 async def on_message(message):
     idUser = int(message.author.id)
-    lcmvwb = 1276143606536863786
-    canalMessage = message.channel.id
-    compteChannel = 1295122739471843379
-    magnifiqueid = 1157663620671488001
-    ledevprimeid = 1128719599811178577
-    if canalMessage == compteChannel and idUser != lcmvwb:
+    canalMessageId = message.channel.id
+    canalMessage = bot.get_channel(message.channel.id)
+    #Magnifique
+    if '@here' in message.content or '@everyone' in message.content and idUser == magnifiqueid:
+        await message.delete()
+        await canalMessage.send(f"<@{magnifiqueid}>, \n**Arrête les teaser, tu ping tout le monde pour rien, sinon je vais partir de l'équipe du jeu !**")
+    #Compte
+    if canalMessageId == compte and idUser != lcmvwb:
         fichierCompteRead = open("compte.txt", "r")
         fichierCompteAppend = open("compte.txt", "a")
         nblignes = 0
@@ -117,7 +194,8 @@ async def on_message(message):
             fichierCompteAppend.write('\n' + message.content)
         else:
             await message.delete()
-    if 'https://' in message.content and idUser != lcmvwb and idUser != ledevprimeid and idUser != magnifiqueid:
+    #Detection de liens
+    if 'https://' in message.content and idUser != lcmvwb and idUser != ledevprimeid and idUser != magnifiqueid and canalMessageId != annonces_jeu and canalMessageId != annonces_discord and canalMessageId != general and canalMessageId != aide and canalMessageId != debats:
         await message.delete()
         await message.channel.send(f"🛑 Pas de pub ici {message.author.mention} ! 🛑")
         if os.path.exists("data" + str(message.author) + ".txt"):
@@ -135,18 +213,5 @@ async def on_message(message):
             for line in fichierRead:
                 nblignes += 1
             fichierAppend.write(f"pub(s): {int(nblignes)}")
-
-    #if "https://" or "http://" in str(message.content) and idUser != lcmvwb:
-        #await message.delete()
-        #await message.channel.send(f"🛑 Pas de pub ici {message.author.mention} ! 🛑")
-        #fichierCreate = open("data" + str(message.author) + ".txt", "x")
-        #fichierAppend = open("data" + str(message.author) + ".txt", "a")
-        #fichierRead = open("data" + str(message.author) + ".txt", "r")
-        #nblignes = 1
-        #for line in fichierRead:
-            #nblignes += 1
-        #print(nblignes)
-        #print(int(nblignes))
-        #fichierAppend.write(f"pub(s): {int(nblignes)}")
 
 bot.run(token)
