@@ -4,7 +4,7 @@ from cProfile import label
 import discord
 from discord.ext import commands
 
-token = "MTI3NjE0MzYwNjUzNjg2Mzc4Ng.GCUmTf.pdtFm9h3yFYP7QBzD2PnTgXera_C66CMMdaKc0"
+token = ""
 intents = discord.Intents.all()
 intents.message_content = True
 intents.dm_messages = True
